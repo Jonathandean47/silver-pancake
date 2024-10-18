@@ -18,6 +18,10 @@ SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Hunter")
 
+# Load and set the window icon
+icon_image = pygame.image.load(".\\assets\\icon.jpeg")
+pygame.display.set_icon(icon_image)
+
 # Custom event for spawning new enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 3000)  # Set timer to spawn new enemies every 3 seconds
