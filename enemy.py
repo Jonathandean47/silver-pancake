@@ -1,19 +1,12 @@
 import pygame
 import random
-from utils import create_triangle_surface
+from game_object import GameObject
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(GameObject):
     def __init__(self, x, y, screen_width, screen_height):
-        super().__init__()
-        self.size = (50, 50)
-        self.color = (255, 0, 0)
-        self.directions = ["up", "down", "left", "right"]
-        self.direction = random.choice(self.directions)
-        self.image = create_triangle_surface(self.size, self.color, self.direction)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        super().__init__(x, y, (50, 50), (255, 0, 0), random.choice(["up", "down", "left", "right"]), screen_width, screen_height)
         self.speed = 2
-        self.mask = pygame.mask.from_surface(self.image)
+        self.directions = ["up", "down", "left", "right"]
 
     def update(self):
         if self.direction == "left":
@@ -25,8 +18,9 @@ class Enemy(pygame.sprite.Sprite):
         elif self.direction == "down":
             self.rect.y += self.speed
         
+        self.check_boundaries()
+        
         # Change direction randomly
         if random.randint(1, 100) > 98:  # 2% chance to change direction
             self.direction = random.choice(self.directions)
-            self.image = create_triangle_surface(self.size, self.color, self.direction)
-            self.mask = pygame.mask.from_surface(self.image)
+            self.update_image()

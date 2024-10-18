@@ -51,7 +51,7 @@ def main():
                 print(f"Collision detected at {collision_position} between Player and Enemy at {enemy.rect.topleft}")
                 
                 # Create a collision sprite at the collision location
-                collision_sprite = CollisionSprite(*collision_position)
+                collision_sprite = CollisionSprite(*collision_position, player.direction, SCREEN_WIDTH, SCREEN_HEIGHT)
                 all_sprites.add(collision_sprite)
                 collision_sprites.add(collision_sprite)
 

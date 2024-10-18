@@ -1,14 +1,9 @@
 import pygame
-from utils import create_triangle_surface
+from game_object import GameObject
 
-class CollisionSprite(pygame.sprite.Sprite):
-    def __init__(self, x, y, lifetime=500):
-        super().__init__()
-        self.size = (50, 50)
-        self.color = (255, 255, 0)  # Yellow color for collision
-        self.image = create_triangle_surface(self.size, self.color, "up")
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+class CollisionSprite(GameObject):
+    def __init__(self, x, y, direction, screen_width, screen_height, lifetime=500):
+        super().__init__(x, y, (10, 10), (255, 255, 0), direction, screen_width, screen_height)
         self.lifetime = lifetime
         self.spawn_time = pygame.time.get_ticks()
 

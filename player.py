@@ -1,17 +1,10 @@
 import pygame
-from utils import create_triangle_surface
+from game_object import GameObject
 
-class Player(pygame.sprite.Sprite):
+class Player(GameObject):
     def __init__(self, screen_width, screen_height):
-        super().__init__()
-        self.size = (50, 50)
-        self.color = (0, 128, 255)
-        self.direction = "down"
-        self.image = create_triangle_surface(self.size, self.color, self.direction)
-        self.rect = self.image.get_rect()
-        self.rect.center = (screen_width // 2, screen_height // 2)
+        super().__init__(screen_width // 2, screen_height // 2, (50, 50), (0, 128, 255), "down", screen_width, screen_height)
         self.speed = 5
-        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, keys):
         if keys[pygame.K_LEFT]:
@@ -27,5 +20,5 @@ class Player(pygame.sprite.Sprite):
             self.rect.y += self.speed
             self.direction = "down"
         
-        self.image = create_triangle_surface(self.size, self.color, self.direction)
-        self.mask = pygame.mask.from_surface(self.image)
+        self.check_boundaries()
+        self.update_image()
