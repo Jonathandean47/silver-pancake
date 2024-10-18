@@ -35,7 +35,7 @@ def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
             all_sprites.add(enemy)
             break
 
-def main():
+def main_game():
     clock = pygame.time.Clock()
     running = True
 
@@ -70,6 +70,9 @@ def main():
             elif event.type == SPAWN_ENEMY_EVENT:
                 # Spawn a new enemy at a random position avoiding obstacles
                 spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Return to menu on Escape key press
+                    running = False
 
         keys = pygame.key.get_pressed()
         player.update(keys, obstacles)  # Pass the obstacles group to the update method
@@ -109,8 +112,35 @@ def main():
         pygame.display.flip()
         clock.tick(60)
 
-    pygame.quit()
-    sys.exit()
+    main_menu()  # Return to main menu after game ends
+
+def main_menu():
+    menu_running = True
+
+    while menu_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                menu_running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Start game on Enter key press
+                    main_game()
+                elif event.key == pygame.K_ESCAPE:  # Quit game on Escape key press
+                    menu_running = False
+
+        screen.fill((0, 0, 0))
+
+        title_text = font.render("RPG Game", True, (255, 255, 255))
+        start_text = font.render("Press Enter to Start", True, (255, 255, 255))
+        quit_text = font.render("Press Escape to Quit", True, (255, 255, 255))
+
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - title_text.get_height() // 2 - 40))
+        screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 - start_text.get_height() // 2))
+        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 - quit_text.get_height() // 2 + 40))
+
+        pygame.display.flip()
 
 if __name__ == "__main__":
-    main()
+    main_menu()
+    pygame.quit()
+    sys.exit()
