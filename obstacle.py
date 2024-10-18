@@ -7,3 +7,4 @@ class Obstacle(pygame.sprite.Sprite):
         self.image.fill((128, 128, 128))  # Gray color for obstacles
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+        self.mask = pygame.mask.from_surface(self.image)

@@ -28,6 +28,7 @@ pygame.time.set_timer(SPAWN_ENEMY_EVENT, 3000)  # Set timer to spawn new enemies
 
 # Font for displaying the enemy counter, win message, and timer
 font = pygame.font.Font(None, 36)
+timer_font = pygame.font.SysFont('courier', 24)
 
 def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
     while True:
@@ -77,7 +78,13 @@ def run_game(player=None):
                 running = False
             elif event.type == SPAWN_ENEMY_EVENT and player:
                 # Spawn a new enemy at a random position avoiding obstacles
-                spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
+                for enemy in enemies:
+                    if enemy.health > 80:
+                        random_int = random.randint(0,100)
+                        if random_int < (33 - len(enemies)):
+                            spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
+                    else:
+                        enemy.health += 10
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  # Return to menu on Escape key press
                     running = False
@@ -107,6 +114,35 @@ def run_game(player=None):
                     all_sprites.add(collision_sprite)
                     collision_sprites.add(collision_sprite)
 
+        # Check for collisions with obstacles using masks for accurate triangle interaction
+        if player:
+            for obstacle in obstacles:
+                offset = (obstacle.rect.left - player.rect.left, obstacle.rect.top - player.rect.top)
+                collision_point = player.mask.overlap(obstacle.mask, offset)
+                if collision_point:
+                    if player.direction == "left":
+                        player.rect.x += player.speed
+                    elif player.direction == "right":
+                        player.rect.x -= player.speed
+                    elif player.direction == "up":
+                        player.rect.y += player.speed
+                    elif player.direction == "down":
+                        player.rect.y -= player.speed
+
+        for enemy in enemies:
+            for obstacle in obstacles:
+                offset = (obstacle.rect.left - enemy.rect.left, obstacle.rect.top - enemy.rect.top)
+                collision_point = enemy.mask.overlap(obstacle.mask, offset)
+                if collision_point:
+                    if enemy.direction == "left":
+                        enemy.rect.x += enemy.speed
+                    elif enemy.direction == "right":
+                        enemy.rect.x -= enemy.speed
+                    elif enemy.direction == "up":
+                        enemy.rect.y += enemy.speed
+                    elif enemy.direction == "down":
+                        enemy.rect.y -= enemy.speed
+
         # Fill the screen with a color (RGB)
         screen.fill((0, 0, 0))
         all_sprites.draw(screen)
@@ -119,7 +155,7 @@ def run_game(player=None):
             # Calculate and display the elapsed time in hh:mm:ss.fff format
             elapsed_time_ms = pygame.time.get_ticks() - start_time
             formatted_time = format_time(elapsed_time_ms)
-            timer_text = font.render(f"Time: {formatted_time}", True, (255, 255, 255))
+            timer_text = timer_font.render(f"Time: {formatted_time}", True, (255, 255, 255))
             screen.blit(timer_text, (SCREEN_WIDTH - timer_text.get_width() - 10, 10))
 
             # Check for win condition (no enemies left)
