@@ -9,8 +9,9 @@ class Enemy(GameObject):
         self.directions = ["up", "down", "left", "right"]
         self.collision_time = None  # Track the time of collision with the player
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
-        self.border_offset = 12.5  # Shrink the border by 1/4 of the sprite's size (50 / 4)
-        self.avoid_radius = 150  # Radius within which enemies will try to avoid the player
+        self.border_offset = 5  # Shrink the border by a bit to avoid corners
+        self.avoid_radius = 300  # Radius within which enemies will try to avoid the player
+        self.change_direction_time = pygame.time.get_ticks()  # Track the last time direction was changed
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
@@ -35,12 +36,14 @@ class Enemy(GameObject):
                 self.direction = "down"
         else:
             # Random movement if outside the avoid radius
-            if random.randint(1, 100) > 98:  # 2% chance to change direction
+            current_time = pygame.time.get_ticks()
+            if current_time - self.change_direction_time > 2000:  # Change direction every 2 seconds
                 new_direction = random.choice(self.directions)
                 while new_direction == self.direction:
                     new_direction = random.choice(self.directions)
                 self.direction = new_direction
                 self.update_image()
+                self.change_direction_time = current_time
 
             if self.direction == "left":
                 self.rect.x -= self.speed
@@ -88,7 +91,7 @@ class Enemy(GameObject):
                 self.collision_time = pygame.time.get_ticks()
             else:
                 elapsed_time = pygame.time.get_ticks() - self.collision_time
-                if elapsed_time > 1000:  # Remove enemy after 1 second of collision
+                if elapsed_time > 500:  # Remove enemy after 1 second of collision
                     self.kill()
         else:
             self.collision_time = None

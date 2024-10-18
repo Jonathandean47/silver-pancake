@@ -46,11 +46,18 @@ def main():
     obstacles = pygame.sprite.Group()
     all_sprites.add(player)
     
-    # Create some random obstacles
+    # Create some random obstacles avoiding the player's initial position
     for _ in range(10):
-        obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
-        obstacles.add(obstacle)
-        all_sprites.add(obstacle)
+        while True:
+            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+            if not obstacle.rect.colliderect(player.rect):
+                obstacles.add(obstacle)
+                all_sprites.add(obstacle)
+                break
+
+    # Ensure the player doesn't spawn in an obstacle
+    while pygame.sprite.spritecollideany(player, obstacles):
+        player.rect.topleft = (random.randint(0, SCREEN_WIDTH - player.rect.width), random.randint(0, SCREEN_HEIGHT - player.rect.height))
 
     # Create some initial enemies
     for i in range(5):
