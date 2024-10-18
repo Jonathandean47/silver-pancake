@@ -7,16 +7,19 @@ from collision_sprite import CollisionSprite
 from obstacle import Obstacle
 from utils import create_triangle_surface, format_time
 
+debug = True
+game_title = "Virus Hunter"
+
 # Initialize Pygame
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 
 # Set up the display
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Hunter")
+pygame.display.set_caption(game_title)
 
 # Load and set the window icon
 icon_image = pygame.image.load(".\\assets\\icon.jpeg")
@@ -40,7 +43,7 @@ def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
             all_sprites.add(enemy)
             break
 
-def run_game(player=None):
+def run_game(player=None, enemy_count=5, obstacle_count=10):
     clock = pygame.time.Clock()
     running = True
 
@@ -53,7 +56,7 @@ def run_game(player=None):
         all_sprites.add(player)
 
     # Create some random obstacles avoiding the player's initial position if player exists
-    for _ in range(10):
+    for _ in range(obstacle_count):
         while True:
             obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
             if not player or not obstacle.rect.colliderect(player.rect):
@@ -67,7 +70,7 @@ def run_game(player=None):
             player.rect.topleft = (random.randint(0, SCREEN_WIDTH - player.rect.width), random.randint(0, SCREEN_HEIGHT - player.rect.height))
 
     # Create some initial enemies
-    for i in range(5):
+    for i in range(enemy_count):
         spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     start_time = pygame.time.get_ticks()  # Record the start time
@@ -88,10 +91,11 @@ def run_game(player=None):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  # Return to menu on Escape key press
                     running = False
-                elif event.key == pygame.K_w and player:  # Quickly test win condition with 'W' key press
-                    enemies.empty()
-                elif event.key == pygame.K_e:  # Quickly test escape condition with 'E' key press
-                    running = False
+                elif event.key == pygame.K_w and player and debug:  # Quickly test win condition with 'W' key press
+                    for enemy in enemies:
+                        enemy.kill()
+                elif event.key == pygame.K_e and debug:  # Quickly test adding enemys
+                    spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
         if player:
             keys = pygame.key.get_pressed()
@@ -165,6 +169,13 @@ def run_game(player=None):
                 pygame.display.flip()
                 pygame.time.wait(3000)  # Display win message for 3 seconds
                 running = False
+            # Check for lose condition (enemies >= 30)
+            if len(enemies) >= 30:
+                lose_text = font.render("You Lose!", True, (255, 0, 0))
+                screen.blit(lose_text, (SCREEN_WIDTH // 2 - lose_text.get_width() // 2, SCREEN_HEIGHT // 2 - lose_text.get_height() // 2))
+                pygame.display.flip()
+                pygame.time.wait(3000)  # Display win message for 3 seconds
+                running = False
 
         # Update the display
         pygame.display.flip()
@@ -173,6 +184,8 @@ def run_game(player=None):
 def main_menu():
     menu_running = True
     clock = pygame.time.Clock()
+    obstacle_count = 10
+    enemy_count = 5
 
     # Initialize background game elements
     enemies = pygame.sprite.Group()
@@ -181,7 +194,7 @@ def main_menu():
     obstacles = pygame.sprite.Group()
     
     # Create some random obstacles
-    for _ in range(10):
+    for _ in range(obstacle_count):
         while True:
             obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
             if not pygame.sprite.spritecollideany(obstacle, obstacles):
@@ -190,7 +203,7 @@ def main_menu():
                 break
 
     # Create some initial enemies
-    for i in range(5):
+    for i in range(enemy_count):
         spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     while menu_running:
@@ -200,26 +213,55 @@ def main_menu():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:  # Start game on Enter key press
-                    run_game(Player(SCREEN_WIDTH, SCREEN_HEIGHT))
+                    run_game(Player(SCREEN_WIDTH, SCREEN_HEIGHT), enemy_count, obstacle_count)
                 elif event.key == pygame.K_ESCAPE:  # Quit game on Escape key press
                     menu_running = False
+                elif event.key == pygame.K_UP:
+                    obstacle_count += 1
+                    while True:
+                        obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+                        if not pygame.sprite.spritecollideany(obstacle, obstacles):
+                            obstacles.add(obstacle)
+                            all_sprites.add(obstacle)
+                            break
+                elif event.key == pygame.K_DOWN:
+                    obstacle_count = max(0, obstacle_count - 1)
+                    obstacle_list = obstacles.sprites()
+                    if obstacle_list:
+                        latest_obstacle = obstacle_list[-1]  # Get the last obstacle added
+                        obstacles.remove(latest_obstacle)
+                        all_sprites.remove(latest_obstacle)  # Also remove from all_sprites if it's part of that group
+                elif event.key == pygame.K_RIGHT:
+                    enemy_count += 1
+                    spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
+                elif event.key == pygame.K_LEFT:
+                    enemy_count = max(0, enemy_count - 1)
+                    enemy_list = enemies.sprites()
+                    if enemy_list:
+                        latest_enemy = enemy_list[-1]
+                        enemies.remove(latest_enemy)
+                        all_sprites.remove(latest_enemy)
 
         # Run the background game loop without a player and without spawning events
         enemies.update(None, enemies, obstacles)  # Pass None for player since there's no player in the background game
         collision_sprites.update()  # Update collision sprites to check their lifetime
         
         # Fill the screen with a color (RGB)
-        screen.fill((0, 0, 0))
+        screen.fill((5, 10, 30))
         all_sprites.draw(screen)
 
         # Display menu text over the background game loop
-        title_text = font.render("HUNTER", True, (255, 255, 255))
+        title_text = font.render(game_title, True, (255, 255, 255))
         start_text = font.render("Press Enter to Start", True, (255, 255, 255))
         quit_text = font.render("Press Escape to Quit", True, (255, 255, 255))
+        obstacle_text = font.render(f"Obstacles: {obstacle_count} (Up/Down to change)", True, (255, 255, 255))
+        enemy_text = font.render(f"Enemies: {enemy_count} (Right/Left to change)", True, (255, 255, 255))
 
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - title_text.get_height() // 2 - 40))
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - title_text.get_height() // 2 - 80))
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 - start_text.get_height() // 2))
         screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 - quit_text.get_height() // 2 + 40))
+        screen.blit(obstacle_text, (SCREEN_WIDTH // 2 - obstacle_text.get_width() // 2, SCREEN_HEIGHT // 2 - obstacle_text.get_height() // 2 + 80))
+        screen.blit(enemy_text, (SCREEN_WIDTH // 2 - enemy_text.get_width() // 2, SCREEN_HEIGHT // 2 - enemy_text.get_height() // 2 + 120))
 
         # Update the display
         pygame.display.flip()
