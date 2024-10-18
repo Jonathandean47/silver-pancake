@@ -22,7 +22,7 @@ pygame.display.set_caption("Hunter")
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 3000)  # Set timer to spawn new enemies every 3 seconds
 
-# Font for displaying the enemy counter and win message
+# Font for displaying the enemy counter, win message, and timer
 font = pygame.font.Font(None, 36)
 
 def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
@@ -63,6 +63,8 @@ def main_game():
     for i in range(5):
         spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
+    start_time = pygame.time.get_ticks()  # Record the start time
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -99,6 +101,11 @@ def main_game():
         # Display the number of enemies on the screen
         enemy_count_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         screen.blit(enemy_count_text, (10, 10))
+
+        # Calculate and display the elapsed time
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Convert milliseconds to seconds
+        timer_text = font.render(f"Time: {elapsed_time}s", True, (255, 255, 255))
+        screen.blit(timer_text, (SCREEN_WIDTH - timer_text.get_width() - 10, 10))
 
         # Check for win condition (no enemies left)
         if len(enemies) == 0:
