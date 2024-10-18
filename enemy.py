@@ -12,6 +12,7 @@ class Enemy(GameObject):
         self.border_offset = 5  # Shrink the border by a bit to avoid corners
         self.avoid_radius = 300  # Radius within which enemies will try to avoid the player
         self.change_direction_time = pygame.time.get_ticks()  # Track the last time direction was changed
+        self.collision_cooldown = 500  # Cooldown period for direction changes after a collision (in milliseconds)
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
@@ -54,7 +55,7 @@ class Enemy(GameObject):
             elif self.direction == "down":
                 self.rect.y += self.speed
 
-        # Adjust boundaries to shrink the border by 1/4 of the sprite's size
+        # Adjust boundaries to shrink the border by a bit to avoid corners
         if self.rect.left < self.border_offset:
             self.rect.left = self.border_offset
         if self.rect.right > self.screen_width - self.border_offset:
@@ -68,20 +69,24 @@ class Enemy(GameObject):
         if pygame.sprite.spritecollideany(self, obstacles):
             self.rect.topleft = original_position
 
-        # Avoid other enemies
+        # Avoid other enemies by forcing them away by a couple of pixels when they collide
         for enemy in enemies:
             if enemy != self:
                 offset = (self.rect.left - enemy.rect.left, self.rect.top - enemy.rect.top)
                 collision_point = enemy.mask.overlap(self.mask, offset)
                 if collision_point:
-                    self.rect.topleft = original_position
-
-                    # Change direction to avoid getting stuck
-                    new_direction = random.choice(self.directions)
-                    while new_direction == self.direction:
-                        new_direction = random.choice(self.directions)
-                    self.direction = new_direction
-                    self.update_image()
+                    current_time = pygame.time.get_ticks()
+                    if current_time - self.change_direction_time > self.collision_cooldown:
+                        if self.direction == "left":
+                            self.rect.x += 5  # Force away by a couple of pixels
+                        elif self.direction == "right":
+                            self.rect.x -= 5  # Force away by a couple of pixels
+                        elif self.direction == "up":
+                            self.rect.y += 5  # Force away by a couple of pixels
+                        elif self.direction == "down":
+                            self.rect.y -= 5  # Force away by a couple of pixels
+                        self.update_image()
+                        self.change_direction_time = current_time
 
         # Check for collision with the player
         offset = (self.rect.left - player.rect.left, self.rect.top - player.rect.top)
