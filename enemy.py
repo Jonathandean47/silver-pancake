@@ -10,7 +10,7 @@ class Enemy(GameObject):
         self.directions = ["up", "down", "left", "right"]
         self.collision_time = None  # Track the time of collision with the player
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
-        self.border_offset = 15  # Shrink the border by a bit to avoid corners
+        self.border_offset = 5  # Shrink the border by a bit to avoid corners
         self.avoid_radius = 300  # Radius within which enemies will try to avoid the player
         self.change_direction_time = pygame.time.get_ticks()  # Track the last time direction was changed
         self.collision_cooldown = 500  # Cooldown period for direction changes after a collision (in milliseconds)
@@ -19,34 +19,36 @@ class Enemy(GameObject):
 
     def update_size(self):
         health_ratio = self.health / self.max_health
-        new_size = (max(int(50 * health_ratio), 20), max(int(50 * health_ratio), 20))
+        new_size = (max(int(50 * health_ratio), 5), max(int(50 * health_ratio), 5))
         self.image = pygame.transform.scale(self.image, new_size)
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
 
-        # Calculate distance to the player
-        distance_to_player = ((self.rect.x - player.rect.x) ** 2 + (self.rect.y - player.rect.y) ** 2) ** 0.5
+        # Calculate distance to the player if player is not None
+        if player is not None:
+            distance_to_player = ((self.rect.x - player.rect.x) ** 2 + (self.rect.y - player.rect.y) ** 2) ** 0.5
 
-        if distance_to_player < self.avoid_radius:
-            # Move away from the player if within the avoid radius
-            if self.rect.x < player.rect.x:
-                self.rect.x -= self.speed
-                self.direction = "left"
-            elif self.rect.x > player.rect.x:
-                self.rect.x += self.speed
-                self.direction = "right"
-            
-            if self.rect.y < player.rect.y:
-                self.rect.y -= self.speed
-                self.direction = "up"
-            elif self.rect.y > player.rect.y:
-                self.rect.y += self.speed
-                self.direction = "down"
-        else:
-            # Random movement if outside the avoid radius
-            current_time = pygame.time.get_ticks()
+            if distance_to_player < self.avoid_radius:
+                # Move away from the player if within the avoid radius
+                if self.rect.x < player.rect.x:
+                    self.rect.x -= self.speed
+                    self.direction = "left"
+                elif self.rect.x > player.rect.x:
+                    self.rect.x += self.speed
+                    self.direction = "right"
+                
+                if self.rect.y < player.rect.y:
+                    self.rect.y -= self.speed
+                    self.direction = "up"
+                elif self.rect.y > player.rect.y:
+                    self.rect.y += self.speed
+                    self.direction = "down"
+
+        # Random movement if outside the avoid radius or if player is None
+        current_time = pygame.time.get_ticks()
+        if player is None or distance_to_player >= self.avoid_radius:
             if current_time - self.change_direction_time > 2000:  # Change direction every 2 seconds
                 new_direction = random.choice(self.directions)
                 while new_direction == self.direction:
@@ -98,26 +100,27 @@ class Enemy(GameObject):
                         self.change_direction_time = current_time
 
         # Check for collision with the player and reduce health if collided
-        offset = (self.rect.left - player.rect.left, self.rect.top - player.rect.top)
-        collision_point = player.mask.overlap(self.mask, offset)
-        if collision_point:
-            if not self.collision_time:
-                self.collision_time = pygame.time.get_ticks()
-                self.speed /= 2  # Cut speed in half on first collision
-            else:
-                elapsed_time = pygame.time.get_ticks() - self.collision_time
-                if elapsed_time > 5:  # Reduce health every 5/1000 of a second of collision
-                    self.health -= 3  # Reduce health by 3
-                    print(f"Enemy health reduced to {self.health}")
-                    self.collision_time = pygame.time.get_ticks()  # Reset collision time
+        if player is not None:
+            offset = (self.rect.left - player.rect.left, self.rect.top - player.rect.top)
+            collision_point = player.mask.overlap(self.mask, offset)
+            if collision_point:
+                if not self.collision_time:
+                    self.collision_time = pygame.time.get_ticks()
+                    self.speed /= 2  # Cut speed in half on first collision
+                else:
+                    elapsed_time = pygame.time.get_ticks() - self.collision_time
+                    if elapsed_time > 5:  # Reduce health every 5/1000 of a second of collision
+                        self.health -= 3  # Reduce health by 3
+                        print(f"Enemy health reduced to {self.health}")
+                        self.collision_time = pygame.time.get_ticks()  # Reset collision time
 
-                    if self.health <= 0:  # Remove enemy if health is 0 or less
-                        self.kill()
-        else:
-            self.collision_time = None
-            # Gradually restore speed if no collision
-            if self.speed < self.original_speed:
-                self.speed += 0.1  # Restore speed gradually
+                        if self.health <= 0:  # Remove enemy if health is 0 or less
+                            self.kill()
+            else:
+                self.collision_time = None
+                # Gradually restore speed if no collision
+                if self.speed < self.original_speed:
+                    self.speed += 0.1  # Restore speed gradually
 
         # Ensure the enemy doesn't stay in the same place for more than half a second
         current_time = pygame.time.get_ticks()

@@ -39,6 +39,26 @@ def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
             all_sprites.add(enemy)
             break
 
+def background_game(enemies, all_sprites, collision_sprites, obstacles):
+    clock = pygame.time.Clock()
+    running = True
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        enemies.update(None, enemies, obstacles)  # Pass None for player since there's no player in the background game
+        collision_sprites.update()  # Update collision sprites to check their lifetime
+        
+        # Fill the screen with a color (RGB)
+        screen.fill((0, 0, 0))
+        all_sprites.draw(screen)
+
+        # Update the display
+        pygame.display.flip()
+        clock.tick(60)
+
 def main_game():
     clock = pygame.time.Clock()
     running = True
@@ -132,6 +152,26 @@ def main_game():
 
 def main_menu():
     menu_running = True
+    clock = pygame.time.Clock()
+
+    # Initialize background game elements
+    enemies = pygame.sprite.Group()
+    all_sprites = pygame.sprite.Group()
+    collision_sprites = pygame.sprite.Group()
+    obstacles = pygame.sprite.Group()
+    
+    # Create some random obstacles
+    for _ in range(10):
+        while True:
+            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+            if not pygame.sprite.spritecollideany(obstacle, obstacles):
+                obstacles.add(obstacle)
+                all_sprites.add(obstacle)
+                break
+
+    # Create some initial enemies
+    for i in range(5):
+        spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     while menu_running:
         for event in pygame.event.get():
@@ -144,8 +184,15 @@ def main_menu():
                 elif event.key == pygame.K_ESCAPE:  # Quit game on Escape key press
                     menu_running = False
 
+        # Run the background game loop
+        enemies.update(None, enemies, obstacles)  # Pass None for player since there's no player in the background game
+        collision_sprites.update()  # Update collision sprites to check their lifetime
+        
+        # Fill the screen with a color (RGB)
         screen.fill((0, 0, 0))
+        all_sprites.draw(screen)
 
+        # Display menu text
         title_text = font.render("HUNTER", True, (255, 255, 255))
         start_text = font.render("Press Enter to Start", True, (255, 255, 255))
         quit_text = font.render("Press Escape to Quit", True, (255, 255, 255))
@@ -154,7 +201,9 @@ def main_menu():
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 - start_text.get_height() // 2))
         screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 - quit_text.get_height() // 2 + 40))
 
+        # Update the display
         pygame.display.flip()
+        clock.tick(60)
 
 if __name__ == "__main__":
     main_menu()
