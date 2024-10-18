@@ -22,7 +22,7 @@ pygame.display.set_caption("Simple RPG Game")
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 3000)  # Set timer to spawn new enemies every 3 seconds
 
-# Font for displaying the enemy counter
+# Font for displaying the enemy counter and win message
 font = pygame.font.Font(None, 36)
 
 def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
@@ -96,6 +96,14 @@ def main():
         # Display the number of enemies on the screen
         enemy_count_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         screen.blit(enemy_count_text, (10, 10))
+
+        # Check for win condition (no enemies left)
+        if len(enemies) == 0:
+            win_text = font.render("You Win!", True, (255, 255, 255))
+            screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - win_text.get_height() // 2))
+            pygame.display.flip()
+            pygame.time.wait(3000)  # Display win message for 3 seconds
+            running = False
 
         # Update the display
         pygame.display.flip()
