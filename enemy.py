@@ -88,15 +88,16 @@ class Enemy(GameObject):
                         self.update_image()
                         self.change_direction_time = current_time
 
-        # Check for collision with the player
+        # Check for collision with the player and cut speed in half if collided
         offset = (self.rect.left - player.rect.left, self.rect.top - player.rect.top)
         collision_point = player.mask.overlap(self.mask, offset)
         if collision_point:
             if not self.collision_time:
                 self.collision_time = pygame.time.get_ticks()
+                self.speed /= 2  # Cut speed in half on first collision
             else:
                 elapsed_time = pygame.time.get_ticks() - self.collision_time
-                if elapsed_time > 500:  # Remove enemy after 1 second of collision
+                if elapsed_time > 500:  # Remove enemy after half a second of collision
                     self.kill()
         else:
             self.collision_time = None
