@@ -75,6 +75,10 @@ def main_game():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  # Return to menu on Escape key press
                     running = False
+                elif event.key == pygame.K_w:  # Quickly test win condition with 'W' key press
+                    enemies.empty()
+                elif event.key == pygame.K_e:  # Quickly test escape condition with 'E' key press
+                    running = False
 
         keys = pygame.key.get_pressed()
         player.update(keys, obstacles)  # Pass the obstacles group to the update method
