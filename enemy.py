@@ -6,6 +6,7 @@ class Enemy(GameObject):
     def __init__(self, x, y, screen_width, screen_height):
         super().__init__(x, y, (50, 50), (255, 0, 0), random.choice(["up", "down", "left", "right"]), screen_width, screen_height)
         self.speed = 2
+        self.original_speed = self.speed  # Store the original speed
         self.directions = ["up", "down", "left", "right"]
         self.collision_time = None  # Track the time of collision with the player
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
@@ -73,7 +74,7 @@ class Enemy(GameObject):
         # Avoid other enemies by forcing them away by a couple of pixels when they collide
         for enemy in enemies:
             if enemy != self:
-                offset = (self.rect.left - enemy.rect.left, self.rect.top - enemy.rect.top)
+                offset = (self.rect.left - enemy.rect.left, enemy.rect.top - enemy.rect.top)
                 collision_point = enemy.mask.overlap(self.mask, offset)
                 if collision_point:
                     current_time = pygame.time.get_ticks()
@@ -99,7 +100,7 @@ class Enemy(GameObject):
             else:
                 elapsed_time = pygame.time.get_ticks() - self.collision_time
                 if elapsed_time > 5:  # Reduce health every 5/1000 of a second of collision
-                    self.health -= 3  # Reduce health by 1
+                    self.health -= 3  # Reduce health by 3
                     print(f"Enemy health reduced to {self.health}")
                     self.collision_time = pygame.time.get_ticks()  # Reset collision time
 
@@ -107,6 +108,9 @@ class Enemy(GameObject):
                         self.kill()
         else:
             self.collision_time = None
+            # Gradually restore speed if no collision
+            if self.speed < self.original_speed:
+                self.speed += 0.1  # Restore speed gradually
 
         # Ensure the enemy doesn't stay in the same place for more than half a second
         current_time = pygame.time.get_ticks()
