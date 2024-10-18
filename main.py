@@ -21,6 +21,9 @@ pygame.display.set_caption("Simple RPG Game")
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 2000)  # Set timer to spawn new enemies every 2 seconds
 
+# Font for displaying the enemy counter
+font = pygame.font.Font(None, 36)
+
 def main():
     clock = pygame.time.Clock()
     running = True
@@ -68,6 +71,10 @@ def main():
         # Fill the screen with a color (RGB)
         screen.fill((0, 0, 0))
         all_sprites.draw(screen)
+
+        # Display the number of enemies on the screen
+        enemy_count_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
+        screen.blit(enemy_count_text, (10, 10))
 
         # Update the display
         pygame.display.flip()
