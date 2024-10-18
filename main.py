@@ -4,6 +4,7 @@ import random
 from player import Player
 from enemy import Enemy
 from collision_sprite import CollisionSprite
+from obstacle import Obstacle
 from utils import create_triangle_surface
 
 # Initialize Pygame
@@ -32,6 +33,7 @@ def main():
     enemies = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     collision_sprites = pygame.sprite.Group()
+    obstacles = pygame.sprite.Group()
     all_sprites.add(player)
     
     # Create some initial enemies
@@ -39,6 +41,12 @@ def main():
         enemy = Enemy(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), SCREEN_WIDTH, SCREEN_HEIGHT)
         enemies.add(enemy)
         all_sprites.add(enemy)
+
+    # Create some random obstacles
+    for _ in range(10):
+        obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+        obstacles.add(obstacle)
+        all_sprites.add(obstacle)
 
     while running:
         for event in pygame.event.get():
@@ -51,11 +59,11 @@ def main():
                 all_sprites.add(enemy)
 
         keys = pygame.key.get_pressed()
-        player.update(keys)
-        enemies.update(player, enemies)  # Pass the player and enemies group to the update method of each enemy
+        player.update(keys, obstacles)  # Pass the obstacles group to the update method
+        enemies.update(player, enemies, obstacles)  # Pass the player, enemies, and obstacles group to the update method of each enemy
         collision_sprites.update()  # Update collision sprites to check their lifetime
         
-        # Check for collisions using masks
+        # Check for collisions using masks and obstacles for enemies
         for enemy in enemies:
             offset = (enemy.rect.left - player.rect.left, enemy.rect.top - player.rect.top)
             collision_point = player.mask.overlap(enemy.mask, offset)

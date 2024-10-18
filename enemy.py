@@ -11,7 +11,9 @@ class Enemy(GameObject):
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
         self.border_offset = 12.5  # Shrink the border by 1/4 of the sprite's size (50 / 4)
 
-    def update(self, player, enemies):
+    def update(self, player, enemies, obstacles):
+        original_position = self.rect.topleft
+
         # Move away from the player
         if self.rect.x < player.rect.x:
             self.rect.x -= self.speed
@@ -37,20 +39,17 @@ class Enemy(GameObject):
         if self.rect.bottom > self.screen_height - self.border_offset:
             self.rect.bottom = self.screen_height - self.border_offset
         
+        # Check for collisions with obstacles and revert to original position if necessary
+        if pygame.sprite.spritecollideany(self, obstacles):
+            self.rect.topleft = original_position
+
         # Avoid other enemies
         for enemy in enemies:
             if enemy != self:
                 offset = (self.rect.left - enemy.rect.left, self.rect.top - enemy.rect.top)
                 collision_point = enemy.mask.overlap(self.mask, offset)
                 if collision_point:
-                    if self.direction == "left":
-                        self.rect.x += self.speed
-                    elif self.direction == "right":
-                        self.rect.x -= self.speed
-                    elif self.direction == "up":
-                        self.rect.y += self.speed
-                    elif self.direction == "down":
-                        self.rect.y -= self.speed
+                    self.rect.topleft = original_position
 
                     # Change direction to avoid getting stuck
                     new_direction = random.choice(self.directions)
