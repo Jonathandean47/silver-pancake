@@ -13,6 +13,7 @@ class Enemy(GameObject):
         self.avoid_radius = 300  # Radius within which enemies will try to avoid the player
         self.change_direction_time = pygame.time.get_ticks()  # Track the last time direction was changed
         self.collision_cooldown = 500  # Cooldown period for direction changes after a collision (in milliseconds)
+        self.health = 100  # Initial health value for the enemy
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
@@ -88,7 +89,7 @@ class Enemy(GameObject):
                         self.update_image()
                         self.change_direction_time = current_time
 
-        # Check for collision with the player and cut speed in half if collided
+        # Check for collision with the player and reduce health if collided
         offset = (self.rect.left - player.rect.left, self.rect.top - player.rect.top)
         collision_point = player.mask.overlap(self.mask, offset)
         if collision_point:
@@ -97,8 +98,13 @@ class Enemy(GameObject):
                 self.speed /= 2  # Cut speed in half on first collision
             else:
                 elapsed_time = pygame.time.get_ticks() - self.collision_time
-                if elapsed_time > 500:  # Remove enemy after half a second of collision
-                    self.kill()
+                if elapsed_time > 5:  # Reduce health every 5/1000 of a second of collision
+                    self.health -= 3  # Reduce health by 1
+                    print(f"Enemy health reduced to {self.health}")
+                    self.collision_time = pygame.time.get_ticks()  # Reset collision time
+
+                    if self.health <= 0:  # Remove enemy if health is 0 or less
+                        self.kill()
         else:
             self.collision_time = None
 

@@ -82,7 +82,7 @@ def main():
             collision_point = player.mask.overlap(enemy.mask, offset)
             if collision_point:
                 collision_position = (player.rect.left + collision_point[0], player.rect.top + collision_point[1])
-                print(f"Collision detected at {collision_position} between Player and Enemy at {enemy.rect.topleft}")
+                # print(f"Collision detected at {collision_position} between Player and Enemy at {enemy.rect.topleft}")
                 
                 # Create a collision sprite at the collision location with the player's direction
                 collision_sprite = CollisionSprite(*collision_position, player.direction, SCREEN_WIDTH, SCREEN_HEIGHT)
