@@ -5,7 +5,7 @@ from player import Player
 from enemy import Enemy
 from collision_sprite import CollisionSprite
 from obstacle import Obstacle
-from utils import create_triangle_surface
+from utils import create_triangle_surface, format_time
 
 # Initialize Pygame
 pygame.init()
@@ -102,9 +102,10 @@ def main_game():
         enemy_count_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         screen.blit(enemy_count_text, (10, 10))
 
-        # Calculate and display the elapsed time
-        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Convert milliseconds to seconds
-        timer_text = font.render(f"Time: {elapsed_time}s", True, (255, 255, 255))
+        # Calculate and display the elapsed time in hh:mm:ss.fff format
+        elapsed_time_ms = pygame.time.get_ticks() - start_time
+        formatted_time = format_time(elapsed_time_ms)
+        timer_text = font.render(f"Time: {formatted_time}", True, (255, 255, 255))
         screen.blit(timer_text, (SCREEN_WIDTH - timer_text.get_width() - 10, 10))
 
         # Check for win condition (no enemies left)
