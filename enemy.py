@@ -10,11 +10,18 @@ class Enemy(GameObject):
         self.directions = ["up", "down", "left", "right"]
         self.collision_time = None  # Track the time of collision with the player
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
-        self.border_offset = 5  # Shrink the border by a bit to avoid corners
+        self.border_offset = 15  # Shrink the border by a bit to avoid corners
         self.avoid_radius = 300  # Radius within which enemies will try to avoid the player
         self.change_direction_time = pygame.time.get_ticks()  # Track the last time direction was changed
         self.collision_cooldown = 500  # Cooldown period for direction changes after a collision (in milliseconds)
         self.health = 100  # Initial health value for the enemy
+        self.max_health = 100
+
+    def update_size(self):
+        health_ratio = self.health / self.max_health
+        new_size = (max(int(50 * health_ratio), 20), max(int(50 * health_ratio), 20))
+        self.image = pygame.transform.scale(self.image, new_size)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
@@ -74,7 +81,7 @@ class Enemy(GameObject):
         # Avoid other enemies by forcing them away by a couple of pixels when they collide
         for enemy in enemies:
             if enemy != self:
-                offset = (self.rect.left - enemy.rect.left, enemy.rect.top - enemy.rect.top)
+                offset = (self.rect.left - enemy.rect.left, self.rect.top - enemy.rect.top)
                 collision_point = enemy.mask.overlap(self.mask, offset)
                 if collision_point:
                     current_time = pygame.time.get_ticks()
@@ -121,3 +128,6 @@ class Enemy(GameObject):
             self.direction = new_direction
             self.update_image()
             self.last_move_time = current_time
+
+        # Update size based on health
+        self.update_size()

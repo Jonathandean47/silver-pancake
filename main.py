@@ -20,7 +20,7 @@ pygame.display.set_caption("Simple RPG Game")
 
 # Custom event for spawning new enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(SPAWN_ENEMY_EVENT, 2000)  # Set timer to spawn new enemies every 2 seconds
+pygame.time.set_timer(SPAWN_ENEMY_EVENT, 3000)  # Set timer to spawn new enemies every 3 seconds
 
 # Font for displaying the enemy counter
 font = pygame.font.Font(None, 36)
