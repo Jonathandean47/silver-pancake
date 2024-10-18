@@ -25,6 +25,16 @@ pygame.time.set_timer(SPAWN_ENEMY_EVENT, 2000)  # Set timer to spawn new enemies
 # Font for displaying the enemy counter
 font = pygame.font.Font(None, 36)
 
+def spawn_enemy(enemies, obstacles, all_sprites, screen_width, screen_height):
+    while True:
+        x = random.randint(0, screen_width - 50)
+        y = random.randint(0, screen_height - 50)
+        enemy = Enemy(x, y, screen_width, screen_height)
+        if not pygame.sprite.spritecollideany(enemy, obstacles):
+            enemies.add(enemy)
+            all_sprites.add(enemy)
+            break
+
 def main():
     clock = pygame.time.Clock()
     running = True
@@ -36,27 +46,23 @@ def main():
     obstacles = pygame.sprite.Group()
     all_sprites.add(player)
     
-    # Create some initial enemies
-    for i in range(5):
-        enemy = Enemy(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), SCREEN_WIDTH, SCREEN_HEIGHT)
-        enemies.add(enemy)
-        all_sprites.add(enemy)
-
     # Create some random obstacles
     for _ in range(10):
         obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
         obstacles.add(obstacle)
         all_sprites.add(obstacle)
 
+    # Create some initial enemies
+    for i in range(5):
+        spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == SPAWN_ENEMY_EVENT:
-                # Spawn a new enemy at a random position
-                enemy = Enemy(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), SCREEN_WIDTH, SCREEN_HEIGHT)
-                enemies.add(enemy)
-                all_sprites.add(enemy)
+                # Spawn a new enemy at a random position avoiding obstacles
+                spawn_enemy(enemies, obstacles, all_sprites, SCREEN_WIDTH, SCREEN_HEIGHT)
 
         keys = pygame.key.get_pressed()
         player.update(keys, obstacles)  # Pass the obstacles group to the update method

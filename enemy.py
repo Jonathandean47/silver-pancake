@@ -10,25 +10,47 @@ class Enemy(GameObject):
         self.collision_time = None  # Track the time of collision with the player
         self.last_move_time = pygame.time.get_ticks()  # Track the last move time
         self.border_offset = 12.5  # Shrink the border by 1/4 of the sprite's size (50 / 4)
+        self.avoid_radius = 150  # Radius within which enemies will try to avoid the player
 
     def update(self, player, enemies, obstacles):
         original_position = self.rect.topleft
 
-        # Move away from the player
-        if self.rect.x < player.rect.x:
-            self.rect.x -= self.speed
-            self.direction = "left"
-        elif self.rect.x > player.rect.x:
-            self.rect.x += self.speed
-            self.direction = "right"
-        
-        if self.rect.y < player.rect.y:
-            self.rect.y -= self.speed
-            self.direction = "up"
-        elif self.rect.y > player.rect.y:
-            self.rect.y += self.speed
-            self.direction = "down"
-        
+        # Calculate distance to the player
+        distance_to_player = ((self.rect.x - player.rect.x) ** 2 + (self.rect.y - player.rect.y) ** 2) ** 0.5
+
+        if distance_to_player < self.avoid_radius:
+            # Move away from the player if within the avoid radius
+            if self.rect.x < player.rect.x:
+                self.rect.x -= self.speed
+                self.direction = "left"
+            elif self.rect.x > player.rect.x:
+                self.rect.x += self.speed
+                self.direction = "right"
+            
+            if self.rect.y < player.rect.y:
+                self.rect.y -= self.speed
+                self.direction = "up"
+            elif self.rect.y > player.rect.y:
+                self.rect.y += self.speed
+                self.direction = "down"
+        else:
+            # Random movement if outside the avoid radius
+            if random.randint(1, 100) > 98:  # 2% chance to change direction
+                new_direction = random.choice(self.directions)
+                while new_direction == self.direction:
+                    new_direction = random.choice(self.directions)
+                self.direction = new_direction
+                self.update_image()
+
+            if self.direction == "left":
+                self.rect.x -= self.speed
+            elif self.direction == "right":
+                self.rect.x += self.speed
+            elif self.direction == "up":
+                self.rect.y -= self.speed
+            elif self.direction == "down":
+                self.rect.y += self.speed
+
         # Adjust boundaries to shrink the border by 1/4 of the sprite's size
         if self.rect.left < self.border_offset:
             self.rect.left = self.border_offset
