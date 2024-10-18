@@ -16,7 +16,7 @@ SCREEN_HEIGHT = 600
 
 # Set up the display
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Simple RPG Game")
+pygame.display.set_caption("Hunter")
 
 # Custom event for spawning new enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
@@ -130,7 +130,7 @@ def main_menu():
 
         screen.fill((0, 0, 0))
 
-        title_text = font.render("RPG Game", True, (255, 255, 255))
+        title_text = font.render("HUNTER", True, (255, 255, 255))
         start_text = font.render("Press Enter to Start", True, (255, 255, 255))
         quit_text = font.render("Press Escape to Quit", True, (255, 255, 255))
 
