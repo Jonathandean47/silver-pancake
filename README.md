@@ -1,4 +1,4 @@
-# silver-pancake
+# virus-hunter
 testing game dev in python
 
 
