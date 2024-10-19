@@ -58,7 +58,7 @@ def run_game(player=None, enemy_count=5, obstacle_count=10):
     # Create some random obstacles avoiding the player's initial position if player exists
     for _ in range(obstacle_count):
         while True:
-            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50, random.choice(["rectangle","circle","triangle"]))
             if not player or not obstacle.rect.colliderect(player.rect):
                 obstacles.add(obstacle)
                 all_sprites.add(obstacle)
@@ -196,7 +196,7 @@ def main_menu():
     # Create some random obstacles
     for _ in range(obstacle_count):
         while True:
-            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50)
+            obstacle = Obstacle(random.randint(0, SCREEN_WIDTH - 50), random.randint(0, SCREEN_HEIGHT - 50), 50, 50, random.choice(["rectangle","circle","triangle"]))
             if not pygame.sprite.spritecollideany(obstacle, obstacles):
                 obstacles.add(obstacle)
                 all_sprites.add(obstacle)
